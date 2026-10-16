@@ -1,0 +1,8 @@
+[project]
+name = "mini-reid-backend"
+version = "0.1.0"
+description = "Person re-identification backend for mini-reid (empty for now)"
+# Same Python as semantic-va, so code moves across without surprises.
+requires-python = ">=3.12,<3.13"
+# Empty on purpose. Dependencies are added step by step in docs/LEARNING-GUIDE.md.
+dependencies = []

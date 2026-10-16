@@ -1,0 +1,13 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+
+# ReID weights and test data are large; keep them out of git
+backend/weights/
+data/
+
+# Node (frontend/.gitignore covers the rest)
+node_modules/
+
+.DS_Store
