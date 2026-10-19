@@ -1,0 +1,7 @@
+# Add the pinned CPU/GPU-compatible versions during environment setup.
+opencv-python
+numpy
+psycopg[binary]
+sqlalchemy
+pydantic-settings
+pydantic>=2.7,<3
