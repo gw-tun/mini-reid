@@ -1,13 +1,25 @@
 # Python
-backend/.venv/
+.venv/
+**/.venv/
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
 
-# ReID weights and test data are large; keep them out of git
-backend/weights/
-data/
+# Environment
+.env
 
-# Node (frontend/.gitignore covers the rest)
+# ReID weights and runtime data
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+models/**/*.download
+data/*
+!data/**/
+!data/**/.gitkeep
+
+# Node
+frontend/node_modules/
+frontend/.next/
 node_modules/
 
 .DS_Store

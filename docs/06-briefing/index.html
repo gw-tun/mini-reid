@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mini-reid — YOLO + FastReID CCTV VMS | Project Briefing</title>
+<meta name="description" content="Interactive project briefing for the CPU-first multi-camera CCTV VMS with YOLO detection, FastReID, MediaMTX, and PostgreSQL.">
+<style>
+:root{
+  --bg:#07111e;--surface:#0d1b2d;--surface2:#11263b;--surface3:#17364d;
+  --line:rgba(180,215,242,.14);--text:#edf6ff;--muted:#91abc2;
+  --cyan:#64dcff;--green:#70e7b1;--amber:#ffc667;--violet:#b79bff;--red:#ff8094;
+  --shadow:0 18px 55px rgba(0,0,0,.24);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--text);background:radial-gradient(circle at 85% -10%,#173d5a 0,transparent 34rem),radial-gradient(circle at 0 45%,#241c49 0,transparent 34rem),var(--bg);font:14px/1.52 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.app{max-width:1480px;margin:auto;padding:20px 28px 70px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:58px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.02em}
+.brand-mark{width:35px;height:35px;border-radius:11px;border:1px solid rgba(100,220,255,.7);display:grid;place-items:center;background:linear-gradient(145deg,rgba(100,220,255,.22),rgba(183,155,255,.17));box-shadow:0 0 26px rgba(100,220,255,.15)}
+.brand-mark:before{content:"";width:13px;height:13px;border:2px solid var(--cyan);border-radius:50%;box-shadow:0 0 0 3px rgba(100,220,255,.13)}
+.nav{display:flex;gap:6px}
+.nav a{padding:8px 11px;text-decoration:none;color:var(--muted);border-radius:8px}
+.nav a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.status{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;border:1px solid rgba(112,231,177,.27);color:var(--green);background:rgba(112,231,177,.07);font-size:12px;white-space:nowrap}
+.status-dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 13px currentColor}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:42px;align-items:end;margin-bottom:42px}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--cyan);font-weight:800;margin-bottom:13px}
+h1{font-size:clamp(42px,6vw,78px);line-height:.98;letter-spacing:-.06em;margin:0 0 20px;max-width:850px}
+.hero-copy{font-size:17px;color:var(--muted);max-width:710px;margin:0 0 24px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:8px;padding:7px 10px;color:#c8dbee;font-size:12px}
+.hero-console{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(17,42,66,.88),rgba(10,24,42,.8));padding:20px;box-shadow:var(--shadow)}
+.console-top{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:20px}.console-top strong{color:var(--text)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi{border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.16);border-radius:12px;padding:13px}
+.kpi label{display:block;color:var(--muted);font-size:11px}.kpi strong{display:block;font-size:23px;letter-spacing:-.035em;margin-top:3px}.kpi small{color:var(--green);font-size:11px}
+.section{margin-top:55px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:17px}.section-head h2{margin:0;font-size:24px;letter-spacing:-.03em}.section-head p{margin:5px 0 0;color:var(--muted);max-width:760px}.section-note{color:var(--muted);font-size:12px;white-space:nowrap}
+.card{border:1px solid var(--line);border-radius:16px;background:rgba(13,27,45,.76);box-shadow:var(--shadow)}
+.arch{padding:20px}.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:stretch}.flow-card{position:relative;min-height:145px;padding:15px;border-radius:13px;border:1px solid rgba(165,205,235,.13);background:linear-gradient(160deg,rgba(20,48,74,.92),rgba(9,25,42,.96))}
+.flow-card:not(:last-child):after{content:"→";position:absolute;right:-18px;top:50%;transform:translateY(-50%);color:var(--cyan);font-size:22px;z-index:2}.flow-card .num{font-size:11px;color:var(--cyan);font-weight:800;letter-spacing:.13em}.flow-card h3{font-size:15px;margin:21px 0 7px}.flow-card p{font-size:12px;color:var(--muted);margin:0}.flow-card.ai{border-color:rgba(183,155,255,.34);box-shadow:inset 0 0 32px rgba(183,155,255,.05)}.flow-card.data{border-color:rgba(255,198,103,.34);box-shadow:inset 0 0 32px rgba(255,198,103,.04)}
+.mode-tabs{display:flex;gap:6px;padding:5px;background:rgba(0,0,0,.2);border-radius:10px;width:max-content;margin-bottom:18px}.mode-tab{border:0;background:transparent;color:var(--muted);border-radius:7px;padding:9px 14px}.mode-tab.active{background:var(--surface3);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.mode-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px}.mode-panel{padding:20px}.mode-panel h3{font-size:20px;margin:0 0 8px}.mode-panel p{color:var(--muted);margin:0 0 17px}.stepper{display:grid;gap:8px}.step{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.12)}.step .step-no{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:rgba(100,220,255,.1);color:var(--cyan);font-size:11px;font-weight:800}.step strong{font-size:12px}.step small{display:block;color:var(--muted);font-size:11px}.step.active{border-color:rgba(112,231,177,.35);background:rgba(112,231,177,.06)}.step.active .step-no{color:var(--green);background:rgba(112,231,177,.14)}
+.live-board{padding:20px}.live-board h3{margin:0 0 4px;font-size:16px}.live-board>p{color:var(--muted);font-size:12px;margin:0 0 17px}.junction{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:center;margin-top:15px}.cam-node{padding:14px;text-align:center;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(0,0,0,.14);font-weight:750}.cam-node.source{border-color:rgba(100,220,255,.5);color:var(--cyan)}.cam-node.branch{border-color:rgba(183,155,255,.38);color:#d9ceff}.route-lines{position:relative;height:66px}.route-lines:before,.route-lines:after{content:"";position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);top:21px}.route-lines:after{top:43px;background:linear-gradient(90deg,transparent,var(--violet),transparent)}.route-label{position:absolute;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);background:var(--surface);padding:2px 6px;border-radius:5px;z-index:1}.route-label.one{top:11px}.route-label.two{top:33px}.branch-controls{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}.branch-btn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:#cfe0ef;border-radius:8px;padding:8px 10px;font-size:12px}.branch-btn.active{border-color:rgba(112,231,177,.4);color:var(--green);background:rgba(112,231,177,.08)}.live-status{margin-top:13px;padding:10px;border-radius:9px;background:rgba(112,231,177,.06);border:1px solid rgba(112,231,177,.19);font-size:12px;color:#cfeee0}.live-status b{color:var(--green)}
+.controls-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px}.control-card{padding:20px}.control-row{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.07)}.control-row:last-child{border-bottom:0}.control-label{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}.control-label span:first-child{font-weight:700;color:#deecf8}.control-value{color:var(--cyan);font-weight:800}.control-help{font-size:11px;color:var(--muted);margin-top:7px}input[type=range]{width:100%;accent-color:var(--cyan)}.load-meter{margin-top:18px}.load-meter-head{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.meter{height:8px;background:#193149;border-radius:20px;margin-top:7px;overflow:hidden}.meter span{display:block;height:100%;width:36%;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));border-radius:20px;transition:width .2s}.rec-box{padding:14px;border-radius:11px;border:1px solid rgba(255,198,103,.24);background:rgba(255,198,103,.055);color:#dfcda5;font-size:12px}.rec-box strong{color:var(--amber)}
+.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.model-card{padding:17px}.model-card .model-top{display:flex;justify-content:space-between;gap:8px;align-items:start}.model-card h3{font-size:15px;margin:0}.tag{font-size:10px;padding:4px 7px;border-radius:999px;color:var(--green);border:1px solid rgba(112,231,177,.25);background:rgba(112,231,177,.08);white-space:nowrap}.model-card code{display:block;margin:13px 0 15px;color:#a8c8e3;font-size:11px;word-break:break-word}.bar{height:5px;background:#1b344a;border-radius:8px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));width:80%}.model-foot{display:flex;justify-content:space-between;margin-top:8px;color:var(--muted);font-size:11px}
+.db-layout{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.schema{padding:20px}.schema-line{display:flex;align-items:center;gap:9px;margin:10px 0}.schema-dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 11px rgba(100,220,255,.6)}.schema-dot.data{background:var(--amber);box-shadow:0 0 11px rgba(255,198,103,.5)}.schema-dot.ai{background:var(--violet);box-shadow:0 0 11px rgba(183,155,255,.5)}.schema-line strong{font-size:12px}.schema-line small{color:var(--muted);font-size:11px}.schema-arrow{color:var(--muted);font-size:13px;margin-left:18px}.db-list{padding:20px}.db-list h3{margin:0 0 13px;font-size:16px}.db-item{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.07)}.db-item:last-child{border-bottom:0}.db-item strong{font-size:12px}.db-item p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.phase{padding:15px 12px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.12);border-radius:12px;cursor:pointer;transition:.18s}.phase:hover,.phase.active{border-color:rgba(100,220,255,.45);transform:translateY(-2px);background:rgba(100,220,255,.06)}.phase .phase-no{color:var(--cyan);font-size:11px;font-weight:800}.phase h3{font-size:13px;margin:12px 0 5px}.phase p{font-size:11px;color:var(--muted);margin:0}.phase-detail{margin-top:14px;padding:15px;border:1px solid rgba(100,220,255,.18);border-radius:11px;background:rgba(100,220,255,.05);color:#cfe0ef;font-size:12px;min-height:47px}
+.requirements{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.req{padding:16px}.req h3{font-size:15px;margin:0 0 9px}.req ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}.req li{color:#c7d9ea;font-size:12px;display:flex;gap:8px}.req li:before{content:"✓";color:var(--green);font-weight:800}
+.footer{display:flex;justify-content:space-between;gap:18px;border-top:1px solid var(--line);padding-top:28px;margin-top:52px;color:var(--muted);font-size:11px}.footer a{color:var(--cyan);text-decoration:none}
+.fade{animation:fade .5s ease both}@keyframes fade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@media(max-width:1100px){.hero{grid-template-columns:1fr}.flow{grid-template-columns:repeat(3,1fr)}.flow-card:nth-child(3):after{display:none}.model-grid{grid-template-columns:1fr 1fr}.timeline{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.app{padding:17px 15px 50px}.topbar{margin-bottom:37px}.nav{display:none}.hero{gap:24px}.mode-layout,.controls-layout,.db-layout{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow-card{min-height:auto}.flow-card:not(:last-child):after{content:"↓";right:50%;top:auto;bottom:-21px;transform:translateX(50%)}.flow-card:nth-child(3):after{display:block}.junction{grid-template-columns:1fr}.route-lines{height:28px}.route-lines:before,.route-lines:after{top:8px}.route-lines:after{top:20px}.route-label.one{top:0}.route-label.two{top:12px}.model-grid,.requirements{grid-template-columns:1fr}.timeline{grid-template-columns:1fr 1fr}.footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><span class="brand-mark"></span><span>mini-reid — YOLO + FastReID CCTV VMS</span></div>
+  <nav class="nav">
+    <a href="#overview">Overview</a><a href="#architecture">Architecture</a><a href="#workflows">Workflows</a><a href="#data">Data</a><a href="#plan">Plan</a>
+  </nav>
+  <div class="status"><span class="status-dot"></span> CPU-first MVP</div>
+</header>
+
+<main>
+<section id="overview" class="hero fade">
+  <div>
+    <div class="eyebrow">Interactive project briefing</div>
+    <h1>Find a person. Follow the identity across cameras.</h1>
+    <p class="hero-copy">A complete MVP plan for a multi-camera CCTV VMS: MediaMTX controls RTSP and recordings, YOLO11m detects people and vehicles, FastReID builds class-specific embeddings, and a route-aware search layer turns matches into evidence.</p>
+    <div class="pills"><span class="pill">Next.js frontend</span><span class="pill">Python AI backend</span><span class="pill">MediaMTX</span><span class="pill">PostgreSQL / Neon</span><span class="pill">CPU development</span></div>
+  </div>
+  <aside class="hero-console">
+    <div class="console-top"><strong>Project operating profile</strong><span>editable assumptions</span></div>
+    <div class="kpis">
+      <div class="kpi"><label>CPU baseline</label><strong>2 FPS</strong><small>correctness first</small></div>
+      <div class="kpi"><label>GPU target</label><strong>5 FPS</strong><small>measure before scale</small></div>
+      <div class="kpi"><label>ReID refresh</label><strong>3–5</strong><small>track observations</small></div>
+      <div class="kpi"><label>Initial vectors</label><strong>2048-D</strong><small>FastReID R50-IBN</small></div>
+    </div>
+  </aside>
+</section>
+
+<section id="architecture" class="section fade">
+  <div class="section-head"><div><div class="eyebrow">01 / System architecture</div><h2>One pipeline, two operating modes</h2><p>Every result stays traceable to a camera, timestamp, recording, model, score, and evidence crop.</p></div><span class="section-note">RTSP → evidence</span></div>
+  <div class="arch card">
+    <div class="flow">
+      <article class="flow-card"><span class="num">01</span><h3>CCTV cameras</h3><p>Hard-coded RTSP paths provide stable MVP inputs.</p></article>
+      <article class="flow-card"><span class="num">02</span><h3>MediaMTX</h3><p>Relays streams and produces time-aligned recording segments.</p></article>
+      <article class="flow-card ai"><span class="num">03</span><h3>YOLO11m</h3><p>Detects person and vehicle boxes on sampled frames.</p></article>
+      <article class="flow-card ai"><span class="num">04</span><h3>Tracker + ReID</h3><p>Builds local tracks and class-specific appearance vectors.</p></article>
+      <article class="flow-card data"><span class="num">05</span><h3>Neon + pgvector</h3><p>Stores event metadata, galleries, matches, and audit state.</p></article>
+      <article class="flow-card"><span class="num">06</span><h3>Next.js VMS UI</h3><p>Shows ranked evidence and live-follow updates.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="workflows" class="section fade">
+  <div class="section-head"><div><div class="eyebrow">02 / Operator workflows</div><h2>Switch between Record Search and Live Follow</h2><p>The same detector, tracker, crop-quality gate, and model registry serve both modes.</p></div></div>
+  <div class="mode-tabs" role="tablist" aria-label="Workflow mode">
+    <button type="button" class="mode-tab active" data-mode="record">Record Search</button>
+    <button type="button" class="mode-tab" data-mode="live">Live Follow</button>
+  </div>
+  <div class="mode-layout">
+    <div class="mode-panel card" id="modeCopy"></div>
+    <div class="live-board card" id="modeVisual"></div>
+  </div>
+</section>
+
+<section id="performance" class="section fade">
+  <div class="section-head"><div><div class="eyebrow">03 / Performance controls</div><h2>Understand the inference budget before adding cameras</h2><p>Change the sampling assumptions and see the recommended operating mode for this MVP.</p></div><span class="section-note">local CPU → optional GPU</span></div>
+  <div class="controls-layout">
+    <div class="control-card card">
+      <div class="control-row"><div class="control-label"><span>Active cameras</span><span class="control-value" id="cameraVal">4</span></div><input id="cameraRange" type="range" min="1" max="24" value="4"><div class="control-help">Use route windows to avoid high-rate ReID on every camera.</div></div>
+      <div class="control-row"><div class="control-label"><span>Sampled FPS</span><span class="control-value" id="fpsVal">2 FPS</span></div><input id="fpsRange" type="range" min="1" max="8" value="2"><div class="control-help">CPU baseline is 2 FPS; increase after measuring p95 latency.</div></div>
+      <div class="control-row"><div class="control-label"><span>ReID refresh interval</span><span class="control-value" id="refreshVal">4 observations</span></div><input id="refreshRange" type="range" min="1" max="8" value="4"><div class="control-help">Refresh on crop change or every 3–5 sampled track observations.</div></div>
+      <div class="load-meter"><div class="load-meter-head"><span>Estimated inference pressure</span><strong id="pressureText">moderate</strong></div><div class="meter"><span id="pressureBar"></span></div></div>
+    </div>
+    <div class="control-card card">
+      <div class="eyebrow">Recommendation</div>
+      <div class="rec-box" id="recommendation"><strong>Balanced start:</strong> index completed recording segments at 2 FPS and keep live cameras on a low-rate sentinel. Activate ReID only for route-aware follow bursts.</div>
+      <div class="stepper" style="margin-top:16px">
+        <div class="step active"><span class="step-no">A</span><div><strong>Bounded queues</strong><small>Drop stale frames when CPU falls behind.</small></div></div>
+        <div class="step"><span class="step-no">B</span><div><strong>Shared workers</strong><small>Load one model per worker and batch across cameras.</small></div></div>
+        <div class="step"><span class="step-no">C</span><div><strong>Route-aware burst</strong><small>Use camera travel windows for Live Follow.</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="models" class="section fade">
+  <div class="section-head"><div><div class="eyebrow">04 / Model registry</div><h2>Keep model choice explicit and swappable</h2><p>Initial production baseline uses one FastReID framework; OSNet-AIN remains a versioned comparison backend.</p></div></div>
+  <div class="model-grid">
+    <article class="model-card card"><div class="model-top"><h3>Person ReID</h3><span class="tag">Primary</span></div><code>models/fastreid/msmt17_sbs_R50-IBN.pth</code><div class="bar"><span style="width:88%"></span></div><div class="model-foot"><span>FastReID · 2048-D</span><span>MSMT17</span></div></article>
+    <article class="model-card card"><div class="model-top"><h3>Vehicle ReID</h3><span class="tag">Primary</span></div><code>models/fastreid/veri_sbs_R50-IBN.pth</code><div class="bar"><span style="width:76%;background:linear-gradient(90deg,var(--amber),var(--red))"></span></div><div class="model-foot"><span>FastReID · 2048-D</span><span>VeRi</span></div></article>
+    <article class="model-card card"><div class="model-top"><h3>Person ReID</h3><span class="tag" style="color:var(--violet);border-color:rgba(183,155,255,.3);background:rgba(183,155,255,.08)">Swap candidate</span></div><code>OSNet-AIN x1.0 · Torchreid</code><div class="bar"><span style="width:62%;background:linear-gradient(90deg,var(--violet),var(--cyan))"></span></div><div class="model-foot"><span>Lightweight · 512-D</span><span>MSMT17</span></div></article>
+  </div>
+</section>
+
+<section id="data" class="section fade">
+  <div class="section-head"><div><div class="eyebrow">05 / Data and indexing</div><h2>Store evidence once, search it many ways</h2><p>Recordings stay outside the database; PostgreSQL stores the searchable event graph and model-versioned vectors.</p></div><span class="section-note">exact → HNSW</span></div>
+  <div class="db-layout">
+    <div class="schema card">
+      <div class="schema-line"><span class="schema-dot"></span><div><strong>Cameras + recordings</strong><small>MediaMTX paths, time ranges, media URIs</small></div></div>
+      <div class="schema-arrow">↓</div>
+      <div class="schema-line"><span class="schema-dot ai"></span><div><strong>Detections + tracks</strong><small>YOLO boxes, local IDs, quality scores</small></div></div>
+      <div class="schema-arrow">↓</div>
+      <div class="schema-line"><span class="schema-dot ai"></span><div><strong>ReID galleries</strong><small>Person/vehicle vectors with model metadata</small></div></div>
+      <div class="schema-arrow">↓</div>
+      <div class="schema-line"><span class="schema-dot data"></span><div><strong>Search + follow events</strong><small>Top-K results, rerank scores, operator state</small></div></div>
+    </div>
+    <div class="db-list card">
+      <h3>Database operating rules</h3>
+      <div class="db-item"><strong>Segment-finalized jobs</strong><p>Nearline index each completed recording segment; midnight is retry and backfill.</p></div>
+      <div class="db-item"><strong>Model-specific indexes</strong><p>Keep FastReID 2048-D and OSNet-AIN 512-D spaces separate.</p></div>
+      <div class="db-item"><strong>Filtered vector search</strong><p>Prune by class, model, camera, and time before reranking.</p></div>
+      <div class="db-item"><strong>Evidence traceability</strong><p>Every match retains source camera, timestamp, model, score, and crop URI.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="plan" class="section fade">
+  <div class="section-head"><div><div class="eyebrow">06 / Delivery plan</div><h2>Build from correctness to scale</h2><p>Select a phase to see its exit criteria.</p></div></div>
+  <div class="timeline" id="timeline">
+    <button type="button" class="phase active" data-phase="0"><span class="phase-no">01</span><h3>Environment</h3><p>CPU stack + MediaMTX</p></button>
+    <button type="button" class="phase" data-phase="1"><span class="phase-no">02</span><h3>Detection</h3><p>YOLO + evidence</p></button>
+    <button type="button" class="phase" data-phase="2"><span class="phase-no">03</span><h3>Tracking</h3><p>Local track gallery</p></button>
+    <button type="button" class="phase" data-phase="3"><span class="phase-no">04</span><h3>Record Search</h3><p>Nearline index</p></button>
+    <button type="button" class="phase" data-phase="4"><span class="phase-no">05</span><h3>Live Follow</h3><p>Graph branches</p></button>
+    <button type="button" class="phase" data-phase="5"><span class="phase-no">06</span><h3>Acceleration</h3><p>GPU + A/B models</p></button>
+  </div>
+  <div class="phase-detail" id="phaseDetail" aria-live="polite">Start one CPU-only recorded clip, verify model loading, database connectivity, and MediaMTX health.</div>
+</section>
+
+<section class="section fade">
+  <div class="section-head"><div><div class="eyebrow">07 / Requirements</div><h2>MVP acceptance checklist</h2></div></div>
+  <div class="requirements">
+    <article class="req card"><h3>Functional</h3><ul><li>RTSP paths load from MediaMTX</li><li>Record Search returns ranked evidence</li><li>Live Follow emits branch events</li><li>Person/vehicle pipelines stay separate</li></ul></article>
+    <article class="req card"><h3>Performance</h3><ul><li>CPU-only startup works without CUDA</li><li>Queues are bounded and observable</li><li>ReID refresh is track-level</li><li>Approximate search is benchmarked against exact</li></ul></article>
+    <article class="req card"><h3>Traceability</h3><ul><li>Model/version stored with vectors</li><li>Camera/time/crop stored with matches</li><li>Threshold policy is configurable</li><li>Operator review state is auditable</li></ul></article>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <span>mini-reid — YOLO + FastReID CCTV VMS · Interactive project briefing</span>
+  <span><a href="../PROJECT_SPEC.md">Proposal</a> · <a href="../DATA_AND_PERFORMANCE.md">Database</a> · <a href="../PROJECT_SPEC.md">Operating model</a></span>
+</footer>
+</div>
+<script>
+(function(){
+  var modeCopy=document.getElementById("modeCopy");
+  var modeVisual=document.getElementById("modeVisual");
+  var tabs=[].slice.call(document.querySelectorAll(".mode-tab"));
+  var modeData={
+    record:{
+      title:"Record Search",
+      text:"Index completed MediaMTX segments asynchronously. Search a selected person or vehicle across time and camera filters using track galleries and model-specific vectors.",
+      steps:[
+        ["01","Segment finalized","Create a retryable recording_index_job."],
+        ["02","YOLO + tracking","Sample, detect, and form local tracks."],
+        ["03","ReID gallery","Keep the best 3–10 crops per track."],
+        ["04","Search evidence","Top-K vector retrieval plus temporal reranking."]
+      ],
+      visual:"record"
+    },
+    live:{
+      title:"Live Follow",
+      text:"Keep low-rate camera sentinels warm, then schedule higher-rate ReID bursts on the outgoing edges of a directed camera graph.",
+      steps:[
+        ["01","Select live track","Create a target gallery and follow session."],
+        ["02","Schedule branches","Use min/max travel windows for next cameras."],
+        ["03","Burst ReID","Batch crops from active camera branches."],
+        ["04","Confirm or expand","Cancel confirmed branches or expand fallback."]
+      ],
+      visual:"live"
+    }
+  };
+  function renderMode(mode){
+    var d=modeData[mode];
+    var html="<div class='eyebrow'>"+(mode==="record"?"Mode A · nearline":"Mode B · route-aware")+"</div><h3>"+d.title+"</h3><p>"+d.text+"</p><div class='stepper'>";
+    d.steps.forEach(function(s,i){html+="<div class='step "+(i===0?"active":"")+"'><span class='step-no'>"+s[0]+"</span><div><strong>"+s[1]+"</strong><small>"+s[2]+"</small></div></div>";});
+    html+="</div>";
+    modeCopy.innerHTML=html;
+    if(mode==="record"){
+      modeVisual.innerHTML="<h3>Segment indexing path</h3><p>Midnight is maintenance; completed segments are searchable nearline.</p><div class='junction'><div class='cam-node source'>MediaMTX<br><small>segment closed</small></div><div class='route-lines'><span class='route-label one'>async job</span><span class='route-label two'>batch write</span></div><div class='cam-node branch'>Neon + pgvector<br><small>searchable evidence</small></div></div><div class='live-status'><b>Operating rule:</b> 2 FPS CPU baseline · 5 FPS after GPU measurement · ReID every 3–5 track observations.</div>";
+    }else{
+      modeVisual.innerHTML="<h3>T-junction branch scheduler</h3><p>Both downstream cameras are candidates until one branch is confirmed.</p><div class='junction'><div class='cam-node source'>CAM-01<br><small>target at T0</small></div><div class='route-lines'><span class='route-label one'>min → max window</span><span class='route-label two'>min → max window</span></div><div><div class='cam-node branch'>CAM-02<br><small>ReID burst</small></div><div style='height:10px'></div><div class='cam-node branch'>CAM-03<br><small>ReID burst</small></div></div></div><div class='branch-controls'><button type='button' class='branch-btn active' data-branch='cam2'>CAM-02 active</button><button type='button' class='branch-btn active' data-branch='cam3'>CAM-03 active</button></div><div class='live-status' id='branchStatus'><b>Branch state:</b> both routes scheduled; confirmation can reduce the other branch.</div>";
+      var bs=[].slice.call(document.querySelectorAll(".branch-btn"));
+      bs.forEach(function(b){b.addEventListener("click",function(){b.classList.toggle("active");var active=bs.filter(function(x){return x.classList.contains("active")}).map(function(x){return x.textContent.replace(" active","")});document.getElementById("branchStatus").innerHTML="<b>Branch state:</b> "+(active.length?active.join(" + ")+" scheduled":"no burst branches; fallback sentinel only")+".";});});
+    }
+  }
+  tabs.forEach(function(t){t.addEventListener("click",function(){tabs.forEach(function(x){x.classList.remove("active")});t.classList.add("active");renderMode(t.getAttribute("data-mode"));});});
+  renderMode("record");
+
+  var cameraRange=document.getElementById("cameraRange"),fpsRange=document.getElementById("fpsRange"),refreshRange=document.getElementById("refreshRange");
+  function syncPressure(){
+    var cameras=Number(cameraRange.value),fps=Number(fpsRange.value),refresh=Number(refreshRange.value);
+    document.getElementById("cameraVal").textContent=cameras;
+    document.getElementById("fpsVal").textContent=fps+" FPS";
+    document.getElementById("refreshVal").textContent=refresh+" observations";
+    var pressure=Math.min(100,Math.round((cameras*fps*1.8)+(cameras>8?14:0)-(refresh-1)*3));
+    document.getElementById("pressureBar").style.width=pressure+"%";
+    var label=pressure<35?"low":pressure<68?"moderate":"high";
+    document.getElementById("pressureText").textContent=label;
+    var rec=document.getElementById("recommendation");
+    if(pressure>=68){rec.innerHTML="<strong>Reduce load:</strong> keep the sentinel at low rate, use route-aware ReID bursts, drop stale frames, and avoid opening every branch at high rate."; }
+    else if(cameras>=8){rec.innerHTML="<strong>Route-aware mode:</strong> keep all cameras on a sentinel and activate only predicted downstream cameras for the high-rate ReID window."; }
+    else{rec.innerHTML="<strong>Balanced start:</strong> index completed segments at 2 FPS and use shared ReID workers for active follow branches."; }
+  }
+  [cameraRange,fpsRange,refreshRange].forEach(function(x){x.addEventListener("input",syncPressure)});syncPressure();
+
+  var details=[
+    "Start one CPU-only recorded clip, verify model loading, database connectivity, and MediaMTX health.",
+    "Sample frames, run YOLO11m, save detections and evidence crops, and link timestamps to recordings.",
+    "Create per-camera track IDs, quality scores, and a small gallery of representative crops.",
+    "Process completed segments nearline, build person/vehicle vectors, and return ranked evidence.",
+    "Add target galleries, directed camera windows, T-junction branches, shared workers, and follow events.",
+    "Add CUDA batching, HNSW benchmarks, OSNet-AIN comparison, and camera-count capacity tests."
+  ];
+  var phases=[].slice.call(document.querySelectorAll(".phase")),detail=document.getElementById("phaseDetail");
+  phases.forEach(function(p){p.addEventListener("click",function(){phases.forEach(function(x){x.classList.remove("active")});p.classList.add("active");detail.textContent=details[Number(p.getAttribute("data-phase"))];});});
+})();
+</script>
+</body>
+</html>
+
+
+

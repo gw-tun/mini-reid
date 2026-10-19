@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: mini-reid-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mini_reid}
+      POSTGRES_USER: ${POSTGRES_USER:-mini_reid}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_for_local_dev}
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mini-reid-mediamtx
+    restart: unless-stopped
+    ports:
+      - "8554:8554"
+      - "8888:8888"
+      - "8889:8889"
+      - "9997:9997"
+    volumes:
+      - ./infra/mediamtx/mediamtx.yml:/mediamtx.yml:ro
+      - ./data/recordings:/recordings
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    container_name: mini-reid-api
+    profiles: ["app"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-mini_reid}:${POSTGRES_PASSWORD:-change_me_for_local_dev}@postgres:5432/${POSTGRES_DB:-mini_reid}
+      MEDIAMTX_API_URL: http://mediamtx:9997
+      DEVICE: ${DEVICE:-cpu}
+      JOB_QUEUE_DIR: /data/cache/job-queue
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./services:/workspace/services
+      - ./data:/data
+      - ./data/recordings:/recordings:ro
+      - ./models:/models:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    container_name: mini-reid-worker
+    profiles: ["app"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-mini_reid}:${POSTGRES_PASSWORD:-change_me_for_local_dev}@postgres:5432/${POSTGRES_DB:-mini_reid}
+      MEDIAMTX_RTSP_BASE: rtsp://mediamtx:8554
+      DEVICE: ${DEVICE:-cpu}
+      SAMPLE_FPS: ${SAMPLE_FPS:-2}
+      REID_REFRESH_OBSERVATIONS: ${REID_REFRESH_OBSERVATIONS:-4}
+      JOB_QUEUE_DIR: /data/cache/job-queue
+    volumes:
+      - ./services:/workspace/services
+      - ./data:/data
+      - ./data/recordings:/recordings:ro
+      - ./models:/models:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+
+volumes:
+  postgres-data:
+

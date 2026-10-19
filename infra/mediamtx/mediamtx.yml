@@ -1,0 +1,30 @@
+# MediaMTX configuration for the MVP.
+# Replace the example source URLs with approved hard-coded RTSP camera paths.
+logLevel: info
+api: yes
+apiAddress: :9997
+rtspAddress: :8554
+hls: yes
+hlsAddress: :8888
+webrtc: yes
+webrtcAddress: :8889
+record: yes
+recordPath: /recordings/%path/%Y-%m-%d_%H-%M-%S
+recordFormat: fmp4
+recordPartDuration: 1s
+recordSegmentDuration: 5m
+
+# The hook must only enqueue work. The API returns 202 quickly; the worker does
+# the expensive YOLO/tracking/ReID processing asynchronously.
+pathDefaults:
+  runOnRecordSegmentComplete: >-
+    curl -fsS --max-time 3
+    "http://api:8000/internal/record-segments/complete?camera=$MTX_PATH&segment_path=$MTX_SEGMENT_PATH&duration=$MTX_SEGMENT_DURATION"
+
+paths:
+  cam01:
+    source: rtsp://user:password@camera-01/stream
+  cam02:
+    source: rtsp://user:password@camera-02/stream
+  cam03:
+    source: rtsp://user:password@camera-03/stream
