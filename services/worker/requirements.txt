@@ -1,7 +1,22 @@
-# Add the pinned CPU/GPU-compatible versions during environment setup.
-opencv-python
-numpy
+# Worker dependencies, pinned to the versions tested on 2026-10-19 (macOS arm64,
+# Python 3.12; CPU and MPS). torch/torchvision/numpy/av match semantic-va's pins
+# so code can move between the projects unchanged. GPU builds: install the CUDA
+# wheels of the same torch/torchvision versions instead.
+
+# models and video
+torch==2.14.0
+torchvision==0.29.0
+numpy==2.5.3
+av==18.1.0
+pillow>=12
+ultralytics==8.4.182    # YOLO11 detector; AGPL-3.0 -- see docs/VIP-9-PERSON-PLAN.md §5
+opencv-python           # pulled in by ultralytics
+
+# storage and settings
 psycopg[binary]
 sqlalchemy
 pydantic-settings
 pydantic>=2.7,<3
+
+# tests
+pytest

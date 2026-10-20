@@ -15,6 +15,36 @@ video file / camera
 The detector only knows six classes: `person`, `car`, `truck`, `bus`,
 `motorcycle` and `bicycle`.
 
+## A 2-second clip is a database row, not a video file
+
+`config.yaml` → `clips: window_seconds: 2.0, stride_seconds: 1.0`. A new window
+starts every second, so windows overlap (0–2 s, 1–3 s, 2–4 s, ...). A 5-minute
+file gives about 300 clips. Cosmos-Embed1 looks at 8 frames from each window
+(`model.num_frames: 8`).
+
+Each clip is one row in `clip_vectors` (`src/core/index.py`): `id`, `run_id`,
+`stream_id`, `clip_start`/`clip_end` (seconds into the file), `media_ts`,
+`wall_ts`, `capture_ts`, and a 768-number `embedding`. **No video is cut out at
+indexing time.** The video stays in its original file on the share, at
+`stream_runs.url`.
+
+**Searching saves nothing.** A search compares vectors and returns clip IDs.
+There's no search history table, which is why mini-reid saves searches itself.
+
+When you **view** a result, the API cuts from the original file on demand and
+caches the result on local disk. These are derived files, safe to delete:
+
+| What | Endpoint | Cached as | How |
+|---|---|---|---|
+| Thumbnail | `/clips/{id}/thumbnail` | `thumbnails/{clip_id}_{width}_{media_ts in ms}_v2.jpg` | One frame, JPEG. Cache capped at 512 MB. |
+| Snippet | `/clips/{id}/snippet` | `snippets/{clip_id}_{media_ts in ms}_{seconds×10}.mp4` | 1–30 s either side, **copied** without re-encoding, so it starts at a keyframe (up to 2 s early on MEVA). Capped at 2 GB. |
+| Playback | `/clips/{id}/recording` | `thumbnails/playback/{sha256}.mp4` | Up to 10 s, **re-encoded** to H.264 at max 960 px so AVI sources play in a browser |
+
+Saved at other times, not at search:
+
+- **Crops:** at indexing, one per track, on the share
+- **Evidence:** only when an alert rule fires, under `evidence_dir`
+
 ## The pieces ReID connects to
 
 | Piece | Where | What it means for ReID |
