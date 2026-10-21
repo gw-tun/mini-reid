@@ -15,15 +15,22 @@ recordPartDuration: 1s
 recordSegmentDuration: 5m
 
 # The hook must only enqueue work. The API returns 202 quickly; the worker does
-# the expensive YOLO/tracking/ReID processing asynchronously.
+# the expensive YOLO/tracking/ReID processing asynchronously. The official
+# MediaMTX image has no curl, so the host-side watcher (scripts/watch_recordings.py)
+# is the primary trigger; this hook covers custom images that ship curl.
 pathDefaults:
   runOnRecordSegmentComplete: >-
     curl -fsS --max-time 3
-    "http://api:8000/internal/record-segments/complete?camera=$MTX_PATH&segment_path=$MTX_SEGMENT_PATH&duration=$MTX_SEGMENT_DURATION"
+    "http://host.docker.internal:8090/internal/record-segments/complete?camera=$MTX_PATH&segment_path=$MTX_SEGMENT_PATH&duration=$MTX_SEGMENT_DURATION"
 
 paths:
   cam01:
-    source: rtsp://user:password@camera-01/stream
+    # Demo feed: a host ffmpeg loop-pushes data/recordings/cam01/segment.mp4
+    # as a publisher (H.264, 25 fps). Recording is on with 5-minute segments so
+    # the record→embed pipeline runs continuously during the demo.
+    source: publisher
+    record: yes
+    recordSegmentDuration: 5m
   cam02:
     source: rtsp://user:password@camera-02/stream
   cam03:

@@ -74,6 +74,12 @@ docker compose up -d postgres mediamtx
 docker compose ps
 ```
 
+Create the versioned PostgreSQL schema and seed the ReID model registry:
+
+```powershell
+python .\scripts\migrate.py
+```
+
 This starts PostgreSQL with pgvector and MediaMTX. Replace the example camera URLs
 in `infra/mediamtx/mediamtx.yml` with the approved hard-coded RTSP sources before
 connecting real cameras.
@@ -85,6 +91,7 @@ connecting real cameras.
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r services/api/requirements.txt
+pip install -r services/worker/requirements.txt
 uvicorn services.api.app.main:app --reload --host 0.0.0.0 --port 8000
 
 # Worker (another terminal using the same environment)
@@ -103,10 +110,26 @@ runs on its configured Next.js development port.
 ```powershell
 docker compose config
 python -m compileall services
+python -m unittest discover -s services/worker/tests -p "test_*.py"
 Set-Location frontend
 npm run lint
 npm run build
 ```
+
+Run a Record Search smoke test against PostgreSQL (the database must be up and
+migrated; the CLI reads `REID_BACKEND=fastreid` and `DATABASE_URL` from `.env`.
+PostgreSQL `vector(2048)` is the only vector store):
+
+```powershell
+docker compose up -d postgres
+python .\scripts\migrate.py
+python -m services.worker.app.cli index-video --video .\data\recordings\cam01\segment.mp4 --camera cam01
+python -m services.worker.app.cli search-image --image .\data\query\person.jpg --object-type person
+```
+
+The equivalent HTTP flow is the webhook `POST /internal/record-segments/complete`
+followed by the worker (`python -m services.worker.app.worker`) and
+`POST /internal/record-search`.
 
 Run the CPU-only path with one recorded segment and one camera first. Validate
 crop quality, exact vector search, evidence links, and queue behavior before enabling

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
+from datetime import datetime
 
 from services.common.events import RecordSegmentEvent
 
@@ -17,7 +18,9 @@ from ..domain.models import (
 
 
 class EmptySegmentReader:
-    def frames(self, segment_path: str, sample_fps: float) -> Iterable[Frame]:
+    def frames(
+        self, segment_path: str, sample_fps: float, started_at: datetime | None = None
+    ) -> Iterable[Frame]:
         return ()
 
 
@@ -50,7 +53,9 @@ class EmptyVectorIndex:
         embedding: Embedding,
         *,
         camera_key: str | None = None,
+        object_type: str | None = None,
         top_k: int = 20,
+        exclude_track_db_id: int | None = None,
     ) -> Sequence[MatchCandidate]:
         return ()
 

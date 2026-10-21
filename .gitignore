@@ -3,6 +3,7 @@
 **/.venv/
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 
 # Environment
@@ -15,6 +16,7 @@ models/**/*.onnx
 models/**/*.download
 data/*
 !data/**/
+data/cache/**
 !data/**/.gitkeep
 
 # Node
@@ -23,3 +25,5 @@ frontend/.next/
 node_modules/
 
 .DS_Store
+
+data/recordings/**/*.mp4

@@ -1,7 +1,19 @@
 # Add the pinned CPU/GPU-compatible versions during environment setup.
 opencv-python
 numpy
+ultralytics>=8.3,<9
 psycopg[binary]
 sqlalchemy
 pydantic-settings
+python-dotenv
 pydantic>=2.7,<3
+
+# FastReID v0.1.1 runtime dependencies. The `fastreid` package itself is vendored
+# under packages/fastreid and installed with:
+#   python -m pip install -e .\packages\fastreid
+termcolor
+yacs
+tabulate
+scikit-learn
+tensorboard
+faiss-cpu

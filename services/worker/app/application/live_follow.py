@@ -50,7 +50,7 @@ class LiveFollowService:
             candidate
             for candidate in self._index.search(
                 embedding,
-                camera_key=observation.camera_key,
+                object_type=observation.object_type.value,
             )
             if candidate.score >= self._similarity_threshold
         )

@@ -37,6 +37,18 @@ The worker atomically moves pending jobs to `processing`, runs
 `failed` with the error text. Replace `FileJobQueue` with a PostgreSQL queue when
 the database schema is ready.
 
+The indexed gallery can be queried with one mounted image path:
+
+```powershell
+curl.exe -X POST "http://localhost:8000/internal/record-search" -H "Content-Type: application/json" -d "{\"image_path\":\"/data/query/person.jpg\",\"object_type\":\"person\",\"top_k\":10}"
+```
+
+The response contains the ranked similarity, camera, track ID, source segment,
+and observed timestamp.
+
+Every search also creates one row in `search_queries` and one `match_results` row
+per returned candidate; PostgreSQL is the only vector store.
+
 ## Live Follow
 
 `LiveFollowService` receives a selected target and a directed camera transition
@@ -49,9 +61,10 @@ continuity decide the match.
 quality crop → `LiveFollowService`. It does not create a model process per camera;
 the runtime wires shared detector/ReID adapters into each camera loop.
 
-The current adapters are intentionally empty. Implement `Detector`, `Tracker`,
-`ReIDModel`, `VectorIndex`, and `FollowEventSink` separately so model changes do
-not alter the application services.
+The worker now provides OpenCV/Ultralytics detection, IoU tracking, crop quality
+gating, a CPU histogram embedding baseline, a FastReID adapter, and the pgvector
+index adapter. The follow event sink is still an integration seam, so model or
+storage changes do not alter the application services.
 
 ## SOLID boundaries
 
