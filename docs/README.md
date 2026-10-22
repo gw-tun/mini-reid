@@ -6,10 +6,13 @@ these documents describe the implementation target.
 
 | Document | Contents |
 |---|---|
+| [VIP-9-SIMPLE-GUIDE-MY.md](VIP-9-SIMPLE-GUIDE-MY.md) | Start here: simple Myanmar explanation of the project, person pipeline, current progress, and next steps |
 | [PROJECT_SPEC.md](PROJECT_SPEC.md) | MVP scope, architecture, models, Record Search, Live Follow, phases, and acceptance criteria |
 | [DATA_AND_PERFORMANCE.md](DATA_AND_PERFORMANCE.md) | PostgreSQL/Neon schema, pgvector search, indexing jobs, retention, and runtime performance |
 | [High-Level Diagram](05-diagrams/HLD.svg) | Service and data-flow overview |
 | [Interactive Briefing](06-briefing/index.html) | Browser briefing for the finalized operating model |
+| [VIP-9-PERSON-PLAN.md](VIP-9-PERSON-PLAN.md) | Person pipeline development plan (VIP-9): scope, adapters, issues to fix, milestones M0–M6 |
+| [VIP-9-DEV-MY.md](VIP-9-DEV-MY.md) | What the person pipeline does so far, high and low level (Myanmar) |
 
 The final operating decisions are:
 
@@ -23,5 +26,6 @@ The final operating decisions are:
 - T-junction branches may run in parallel, using shared model workers and bounded per-camera queues.
 - Model versions and vector spaces stay explicit so future OSNet-AIN comparisons cannot mix embeddings.
 
-Recommended reading order: `PROJECT_SPEC.md`, then `DATA_AND_PERFORMANCE.md`, then
-the interactive briefing.
+Recommended reading order: `VIP-9-SIMPLE-GUIDE-MY.md`, then `VIP-9-DEV-MY.md` and
+`VIP-9-PERSON-PLAN.md`. Read `PROJECT_SPEC.md` and `DATA_AND_PERFORMANCE.md` for
+the detailed project design, then the interactive briefing.

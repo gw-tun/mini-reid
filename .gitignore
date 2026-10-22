@@ -14,7 +14,7 @@ models/**/*.pt
 models/**/*.pth
 models/**/*.onnx
 models/**/*.download
-data/*
+data/**
 !data/**/
 data/cache/**
 !data/**/.gitkeep
