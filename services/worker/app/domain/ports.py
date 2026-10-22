@@ -19,7 +19,9 @@ from .models import (
 
 
 class SegmentReader(Protocol):
-    def frames(self, segment_path: str, sample_fps: float) -> Iterable[Frame]: ...
+    def frames(
+        self, segment_path: str, sample_fps: float, started_at: datetime | None = None
+    ) -> Iterable[Frame]: ...
 
 
 class Detector(Protocol):
@@ -46,12 +48,24 @@ class VectorIndex(Protocol):
         embedding: Embedding,
         *,
         camera_key: str | None = None,
+        object_type: str | None = None,
         top_k: int = 20,
+        exclude_track_db_id: int | None = None,
     ) -> Sequence[MatchCandidate]: ...
 
 
 class RecordingStore(Protocol):
     def save_index_result(self, event: RecordSegmentEvent, frames_seen: int, embeddings_written: int) -> None: ...
+
+
+class SearchResultStore(Protocol):
+    def save_search(
+        self,
+        object_type: str,
+        vector_space: str,
+        top_k: int,
+        candidates: Sequence[MatchCandidate],
+    ) -> None: ...
 
 
 class FollowEventSink(Protocol):

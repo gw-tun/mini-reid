@@ -38,6 +38,18 @@ $artifacts = @(
         Url = 'https://raw.githubusercontent.com/JDAI-CV/fast-reid/v0.1.1/configs/VeRi/sbs_R50-ibn.yml'
         RelativePath = 'models/fastreid/configs/veri_sbs_R50-IBN.yml'
         Source = 'FastReID official repository tag v0.1.1'
+    },
+    [pscustomobject]@{
+        Name = 'FastReID Base-Strongerbaseline config'
+        Url = 'https://raw.githubusercontent.com/JDAI-CV/fast-reid/v0.1.1/configs/Base-Strongerbaseline.yml'
+        RelativePath = 'models/fastreid/Base-Strongerbaseline.yml'
+        Source = 'FastReID official repository tag v0.1.1'
+    },
+    [pscustomobject]@{
+        Name = 'FastReID Base-bagtricks config'
+        Url = 'https://raw.githubusercontent.com/JDAI-CV/fast-reid/v0.1.1/configs/Base-bagtricks.yml'
+        RelativePath = 'models/fastreid/Base-bagtricks.yml'
+        Source = 'FastReID official repository tag v0.1.1'
     }
 )
 

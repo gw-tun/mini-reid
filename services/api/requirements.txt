@@ -3,4 +3,16 @@ uvicorn[standard]
 psycopg[binary]
 sqlalchemy
 pydantic-settings
+python-dotenv
 pydantic>=2.7,<3
+opencv-python-headless
+numpy
+# FastReID v0.1.1 runtime dependencies (the /internal/record-search endpoint
+# imports the worker embedding service). The vendored package is installed with:
+#   python -m pip install -e .\packages\fastreid
+termcolor
+yacs
+tabulate
+scikit-learn
+tensorboard
+faiss-cpu

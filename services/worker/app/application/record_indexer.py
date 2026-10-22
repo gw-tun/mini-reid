@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from datetime import timedelta
 
 from services.common.events import RecordSegmentEvent
 
@@ -50,7 +51,15 @@ class RecordIndexingService:
         """Run the pipeline; adapters currently return empty results by design."""
 
         frames_seen = detections_seen = tracks_seen = embeddings_written = 0
-        for frame in self._reader.frames(event.segment_path, self._sample_fps):
+        # Video frame 0 maps to the recording's wall-clock start so that
+        # observed_at - recordings.started_at is the exact offset into the
+        # segment (the playback overlay and crop endpoints rely on this).
+        started_at = event.completed_at - timedelta(seconds=event.duration_seconds)
+        for frame in self._reader.frames(event.segment_path, self._sample_fps, started_at=started_at):
+            # The reader may not know the camera (e.g. the shared worker reader);
+            # attribute every observation to the event's camera instead of the
+            # segment filename stem.
+            frame = replace(frame, camera_key=event.camera_key)
             frames_seen += 1
             detections = self._detector.detect(frame)
             detections_seen += len(detections)

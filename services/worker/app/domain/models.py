@@ -61,6 +61,11 @@ class MatchCandidate:
     camera_key: str
     track_id: str
     score: float
+    track_db_id: int | None = None
+    segment_path: str | None = None
+    observed_at: datetime | None = None
+    object_type: ObjectType | None = None
+    detection_id: int | None = None
 
 
 @dataclass(frozen=True)
